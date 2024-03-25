@@ -1,10 +1,10 @@
 import type { Handler } from 'express';
 
 import logger from '@hey/lib/logger';
-import catchedError from '@utils/catchedError';
-import validateLensAccount from '@utils/middlewares/validateLensAccount';
-import prisma from '@utils/prisma';
-import { invalidBody, noBody, notAllowed } from '@utils/responses';
+import catchedError from 'src/lib/catchedError';
+import validateLensAccount from 'src/lib/middlewares/validateLensAccount';
+import prisma from 'src/lib/prisma';
+import { invalidBody, noBody, notAllowed } from 'src/lib/responses';
 import { array, number, object, string } from 'zod';
 
 type ExtensionRequest = {
@@ -49,7 +49,7 @@ export const post: Handler = async (req, res) => {
         endsAt: new Date(Date.now() + length * 24 * 60 * 60 * 1000),
         options: {
           createMany: {
-            data: options.map((option) => ({ option })),
+            data: options.map((option, index) => ({ index, option })),
             skipDuplicates: true
           }
         }

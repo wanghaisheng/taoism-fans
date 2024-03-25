@@ -1,10 +1,10 @@
 import type { Handler } from 'express';
 
 import logger from '@hey/lib/logger';
-import catchedError from '@utils/catchedError';
-import createClickhouseClient from '@utils/createClickhouseClient';
-import { invalidBody, noBody } from '@utils/responses';
 import requestIp from 'request-ip';
+import catchedError from 'src/lib/catchedError';
+import createClickhouseClient from 'src/lib/createClickhouseClient';
+import { invalidBody, noBody } from 'src/lib/responses';
 import urlcat from 'urlcat';
 import { array, object, string } from 'zod';
 
@@ -56,6 +56,7 @@ export const post: Handler = async (req, res) => {
     const values = ids.map((id) => ({
       city: ipData?.city || null,
       country: ipData?.country || null,
+      ip: ip || null,
       publication_id: id,
       region: ipData?.regionName || null,
       viewer_id

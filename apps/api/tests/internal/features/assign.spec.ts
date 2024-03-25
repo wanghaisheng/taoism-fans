@@ -1,7 +1,7 @@
 import { TEST_LENS_ID } from '@hey/data/constants';
 import getAuthApiHeadersForTest from '@hey/lib/getAuthApiHeadersForTest';
-import { TEST_URL } from '@utils/constants';
 import axios from 'axios';
+import { TEST_URL } from 'src/lib/constants';
 import { describe, expect, test } from 'vitest';
 
 describe('internal/features/assign', () => {
@@ -10,7 +10,7 @@ describe('internal/features/assign', () => {
       `${TEST_URL}/internal/features/assign`,
       {
         enabled: true,
-        id: '0779d74f-0426-4988-b4c4-2b632f5de8e1',
+        id: '8ed8b26a-279d-4111-9d39-a40164b273a0',
         profile_id: TEST_LENS_ID
       },
       { headers: await getAuthApiHeadersForTest() }
@@ -24,7 +24,7 @@ describe('internal/features/assign', () => {
       `${TEST_URL}/internal/features/assign`,
       {
         enabled: false,
-        id: '0779d74f-0426-4988-b4c4-2b632f5de8e1',
+        id: '8ed8b26a-279d-4111-9d39-a40164b273a0',
         profile_id: TEST_LENS_ID
       },
       { headers: await getAuthApiHeadersForTest() }

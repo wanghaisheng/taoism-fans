@@ -23,10 +23,8 @@ const PublicationHeader: FC<PublicationHeaderProps> = ({
   publication,
   quoted = false
 }) => {
-  const setQuotedPublication = usePublicationStore(
-    (state) => state.setQuotedPublication
-  );
-  const gardenerMode = useFeatureFlagsStore((state) => state.gardenerMode);
+  const { setQuotedPublication } = usePublicationStore();
+  const { gardenerMode } = useFeatureFlagsStore();
 
   const targetPublication = isMirrorPublication(publication)
     ? publication?.mirrorOn
@@ -39,7 +37,7 @@ const PublicationHeader: FC<PublicationHeaderProps> = ({
 
   return (
     <div
-      className="flex justify-between space-x-1.5"
+      className="flex w-full items-start justify-between"
       onClick={stopEventPropagation}
     >
       <PublicationProfile
@@ -49,15 +47,17 @@ const PublicationHeader: FC<PublicationHeaderProps> = ({
       />
       {!publication.isHidden && !quoted ? (
         <PublicationMenu publication={targetPublication} />
-      ) : null}
+      ) : (
+        <div className="size-[30px]" />
+      )}
       {quoted && isNew ? (
         <button
           aria-label="Remove Quote"
-          className="outline-brand-500 rounded-full border p-1 hover:bg-gray-300/20"
+          className="rounded-full border p-1.5 hover:bg-gray-300/20"
           onClick={() => setQuotedPublication(null)}
           type="reset"
         >
-          <XMarkIcon className="ld-text-gray-500 size-3.5" />
+          <XMarkIcon className="ld-text-gray-500 size-4" />
         </button>
       ) : null}
     </div>

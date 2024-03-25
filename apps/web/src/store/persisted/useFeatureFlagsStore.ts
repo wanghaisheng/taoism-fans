@@ -1,30 +1,27 @@
 import { IndexDB } from '@hey/data/storage';
+import { createTrackedSelector } from 'react-tracked';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import createIdbStorage from '../lib/createIdbStorage';
 
-interface FeatureFlagsState {
+interface State {
   featureFlags: string[];
   gardenerMode: boolean;
-  hydrateFeatureFlags: () => { featureFlags: string[] };
+  hydrateFeatureFlags: () => string[];
   resetFeatureFlags: () => void;
   setFeatureFlags: (featureFlags: string[]) => void;
   setGardenerMode: (gardenerMode: boolean) => void;
   setStaffMode: (staffMode: boolean) => void;
-  setTrusted: (trusted: boolean) => void;
   staffMode: boolean;
-  trusted: boolean;
 }
 
-export const useFeatureFlagsStore = create(
-  persist<FeatureFlagsState>(
+const store = create(
+  persist<State>(
     (set, get) => ({
       featureFlags: [],
       gardenerMode: false,
-      hydrateFeatureFlags: () => {
-        return { featureFlags: get().featureFlags };
-      },
+      hydrateFeatureFlags: () => get().featureFlags,
       resetFeatureFlags: () =>
         set(() => ({
           featureFlags: [],
@@ -34,9 +31,7 @@ export const useFeatureFlagsStore = create(
       setFeatureFlags: (featureFlags) => set(() => ({ featureFlags })),
       setGardenerMode: (gardenerMode) => set(() => ({ gardenerMode })),
       setStaffMode: (staffMode) => set(() => ({ staffMode })),
-      setTrusted: (trusted) => set(() => ({ trusted })),
-      staffMode: false,
-      trusted: false
+      staffMode: false
     }),
     {
       name: IndexDB.FeatureFlagsStore,
@@ -45,5 +40,5 @@ export const useFeatureFlagsStore = create(
   )
 );
 
-export const hydrateFeatureFlags = () =>
-  useFeatureFlagsStore.getState().hydrateFeatureFlags();
+export const hydrateFeatureFlags = () => store.getState().hydrateFeatureFlags();
+export const useFeatureFlagsStore = createTrackedSelector(store);

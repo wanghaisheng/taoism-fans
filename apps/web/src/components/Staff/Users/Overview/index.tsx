@@ -18,10 +18,10 @@ import {
 } from '@hey/ui';
 import { Leafwatch } from '@lib/leafwatch';
 import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 import Custom404 from 'src/pages/404';
 import { useFeatureFlagsStore } from 'src/store/persisted/useFeatureFlagsStore';
-import useProfileStore from 'src/store/persisted/useProfileStore';
-import { useEffectOnce } from 'usehooks-ts';
+import { useProfileStore } from 'src/store/persisted/useProfileStore';
 
 import StaffSidebar from '../../Sidebar';
 
@@ -30,15 +30,15 @@ const Overview: NextPage = () => {
     isReady,
     query: { id }
   } = useRouter();
-  const currentProfile = useProfileStore((state) => state.currentProfile);
-  const staffMode = useFeatureFlagsStore((state) => state.staffMode);
+  const { currentProfile } = useProfileStore();
+  const { staffMode } = useFeatureFlagsStore();
 
-  useEffectOnce(() => {
+  useEffect(() => {
     Leafwatch.track(PAGEVIEW, {
       page: 'staff-tools',
       subpage: 'user-overview'
     });
-  });
+  }, []);
 
   const { data, error, loading } = useProfileQuery({
     skip: !id || !isReady,
@@ -56,14 +56,14 @@ const Overview: NextPage = () => {
       <GridItemFour>
         <StaffSidebar />
       </GridItemFour>
-      <GridItemEight className="space-y-5">
+      <GridItemEight>
         <Card className="border-dashed border-yellow-600 !bg-yellow-300/20 p-5">
           {loading ? (
-            <Loader message="Loading profile" />
+            <Loader className="my-5" message="Loading profile" />
           ) : !profile ? (
             <EmptyState
               hideCard
-              icon={<UserIcon className="size-8 text-yellow-600" />}
+              icon={<UserIcon className="size-8" />}
               message="No profile found"
             />
           ) : error ? (

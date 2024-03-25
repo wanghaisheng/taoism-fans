@@ -1,11 +1,12 @@
 import type { FC } from 'react';
 
+import Loader from '@components/Shared/Loader';
 import { StarIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { LensHub } from '@hey/abis';
 import {
   ADDRESS_PLACEHOLDER,
   DEFAULT_COLLECT_TOKEN,
-  LENSHUB_PROXY
+  LENS_HUB
 } from '@hey/data/constants';
 import { Errors } from '@hey/data/errors';
 import { Regex } from '@hey/data/regex';
@@ -21,10 +22,10 @@ import getSignature from '@hey/lib/getSignature';
 import {
   Button,
   Card,
+  CardHeader,
   Form,
   Input,
   Select,
-  Spinner,
   useZodForm
 } from '@hey/ui';
 import errorToast from '@lib/errorToast';
@@ -35,7 +36,7 @@ import toast from 'react-hot-toast';
 import useHandleWrongNetwork from 'src/hooks/useHandleWrongNetwork';
 import { useNonceStore } from 'src/store/non-persisted/useNonceStore';
 import { useProfileRestriction } from 'src/store/non-persisted/useProfileRestriction';
-import useProfileStore from 'src/store/persisted/useProfileStore';
+import { useProfileStore } from 'src/store/persisted/useProfileStore';
 import { useSignTypedData, useWriteContract } from 'wagmi';
 import { object, string } from 'zod';
 
@@ -47,14 +48,13 @@ const newSuperFollowSchema = object({
 });
 
 const SuperFollow: FC = () => {
-  const currentProfile = useProfileStore((state) => state.currentProfile);
+  const { currentProfile } = useProfileStore();
   const { isSuspended } = useProfileRestriction();
-  const lensHubOnchainSigNonce = useNonceStore(
-    (state) => state.lensHubOnchainSigNonce
-  );
-  const setLensHubOnchainSigNonce = useNonceStore(
-    (state) => state.setLensHubOnchainSigNonce
-  );
+  const {
+    decrementLensHubOnchainSigNonce,
+    incrementLensHubOnchainSigNonce,
+    lensHubOnchainSigNonce
+  } = useNonceStore();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState(
     DEFAULT_COLLECT_TOKEN
@@ -95,23 +95,23 @@ const SuperFollow: FC = () => {
 
   const { signTypedDataAsync } = useSignTypedData({ mutation: { onError } });
 
-  const { writeContract } = useWriteContract({
+  const { writeContractAsync } = useWriteContract({
     mutation: {
-      onError: (error) => {
+      onError: (error: Error) => {
         onError(error);
-        setLensHubOnchainSigNonce(lensHubOnchainSigNonce - 1);
+        decrementLensHubOnchainSigNonce();
       },
       onSuccess: () => {
         onCompleted();
-        setLensHubOnchainSigNonce(lensHubOnchainSigNonce + 1);
+        incrementLensHubOnchainSigNonce();
       }
     }
   });
 
-  const write = ({ args }: { args: any[] }) => {
-    return writeContract({
+  const write = async ({ args }: { args: any[] }) => {
+    return await writeContractAsync({
       abi: LensHub,
-      address: LENSHUB_PROXY,
+      address: LENS_HUB,
       args,
       functionName: 'setFollowModule'
     });
@@ -128,6 +128,7 @@ const SuperFollow: FC = () => {
         const { followModule, followModuleInitData, profileId } =
           typedData.value;
         const args = [profileId, followModule, followModuleInitData];
+        await handleWrongNetwork();
 
         if (canBroadcast) {
           const signature = await signTypedDataAsync(getSignature(typedData));
@@ -135,13 +136,13 @@ const SuperFollow: FC = () => {
             variables: { request: { id, signature } }
           });
           if (data?.broadcastOnchain.__typename === 'RelayError') {
-            return write({ args });
+            return await write({ args });
           }
 
           return;
         }
 
-        return write({ args });
+        return await write({ args });
       },
       onError
     });
@@ -156,10 +157,6 @@ const SuperFollow: FC = () => {
 
     if (isSuspended) {
       return toast.error(Errors.Suspended);
-    }
-
-    if (handleWrongNetwork()) {
-      return;
     }
 
     try {
@@ -187,10 +184,7 @@ const SuperFollow: FC = () => {
   if (allowedTokensLoading) {
     return (
       <Card>
-        <div className="space-y-2 p-5 py-10 text-center">
-          <Spinner className="mx-auto" size="md" />
-          <div>Loading Super follow settings</div>
-        </div>
+        <Loader className="my-10" message="Loading Super follow settings" />
       </Card>
     );
   }
@@ -199,20 +193,20 @@ const SuperFollow: FC = () => {
 
   return (
     <Card>
+      <CardHeader
+        body="Setting Super follow makes users spend crypto to follow you, and it's
+        a good way to earn it, you can change the amount and currency or
+        disable/enable it anytime."
+        title="Set Super follow"
+      />
       <Form
-        className="space-y-4 p-5"
+        className="m-5 space-y-4"
         form={form}
         onSubmit={async ({ amount, recipient }) => {
           await setSuperFollow(amount, recipient);
         }}
       >
-        <div className="text-lg font-bold">Set Super follow</div>
-        <p>
-          Setting Super follow makes users spend crypto to follow you, and it's
-          a good way to earn it, you can change the amount and currency or
-          disable/enable it anytime.
-        </p>
-        <div className="pt-2">
+        <div>
           <div className="label">Select currency</div>
           <Select
             defaultValue={
@@ -221,9 +215,10 @@ const SuperFollow: FC = () => {
                 ? currentProfile?.followModule?.amount.asset.contract.address
                 : undefined
             }
-            onChange={(e) => setSelectedCurrency(e.target.value)}
+            onChange={(value) => setSelectedCurrency(value)}
             options={allowedTokens?.map((token) => ({
               label: token.name,
+              selected: token.contractAddress === selectedCurrency,
               value: token.contractAddress
             }))}
           />

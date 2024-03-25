@@ -1,7 +1,9 @@
 import type { FC } from 'react';
 
+import { BanknotesIcon } from '@heroicons/react/24/outline';
 import { OpenAction } from '@hey/data/enums';
 import { TipIcon } from '@hey/icons';
+import isFeatureAvailable from '@lib/isFeatureAvailable';
 import {
   ScreenType,
   useOpenActionStore
@@ -12,20 +14,26 @@ import OpenActionsConfig from './OpenActionsConfig';
 import SaveOrCancel from './SaveOrCancel';
 
 const OpenActionsList: FC = () => {
-  const setShowModal = useOpenActionStore((state) => state.setShowModal);
-  const screen = useOpenActionStore((state) => state.screen);
-  const selectedOpenAction = useOpenActionStore(
-    (state) => state.selectedOpenAction
-  );
+  const { screen, selectedOpenAction, setShowModal } = useOpenActionStore();
 
   return screen === ScreenType.List ? (
     <div className="p-5">
-      <OpenActionItem
-        description="Add ability to tip"
-        icon={<TipIcon className="size-6" />}
-        title="Tipping"
-        type={OpenAction.Tip}
-      />
+      <div className="mb-5 space-y-3">
+        {isFeatureAvailable('swap-oa') && (
+          <OpenActionItem
+            description="Swap any ERC-20 token"
+            icon={<BanknotesIcon className="size-6" />}
+            title="Token Swap"
+            type={OpenAction.Swap}
+          />
+        )}
+        <OpenActionItem
+          description="Add ability to tip"
+          icon={<TipIcon className="size-6" />}
+          title="Tipping"
+          type={OpenAction.Tip}
+        />
+      </div>
       <SaveOrCancel
         onSave={() => setShowModal(false)}
         saveDisabled={selectedOpenAction === null}

@@ -1,7 +1,7 @@
 import type { PublicationMetadataMainFocusType } from '@hey/lens';
 import type { NextPage } from 'next';
 
-import RecommendedProfiles from '@components/Home/Sidebar/RecommendedProfiles';
+import WhoToFollow from '@components/Home/Sidebar/WhoToFollow';
 import FeedFocusType from '@components/Shared/FeedFocusType';
 import Footer from '@components/Shared/Footer';
 import { Tab } from '@headlessui/react';
@@ -11,20 +11,19 @@ import { GridItemEight, GridItemFour, GridLayout } from '@hey/ui';
 import cn from '@hey/ui/cn';
 import { Leafwatch } from '@lib/leafwatch';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
-import useProfileStore from 'src/store/persisted/useProfileStore';
-import { useEffectOnce } from 'usehooks-ts';
+import { useEffect, useState } from 'react';
+import { useProfileStore } from 'src/store/persisted/useProfileStore';
 
 import Feed from './Feed';
 
 const Explore: NextPage = () => {
   const router = useRouter();
-  const currentProfile = useProfileStore((state) => state.currentProfile);
+  const { currentProfile } = useProfileStore();
   const [focus, setFocus] = useState<PublicationMetadataMainFocusType>();
 
-  useEffectOnce(() => {
+  useEffect(() => {
     Leafwatch.track(PAGEVIEW, { page: 'explore' });
-  });
+  }, []);
 
   const tabs = [
     { name: 'For you', type: ExplorePublicationsOrderByType.LensCurated },
@@ -54,11 +53,8 @@ const Explore: NextPage = () => {
               <Tab
                 className={({ selected }) =>
                   cn(
-                    {
-                      'border-brand-500 border-b-2 !text-black dark:!text-white':
-                        selected
-                    },
-                    'ld-text-gray-500 px-4 pb-2 text-xs font-medium outline-none sm:text-sm'
+                    { 'border-b-2 border-black dark:border-white': selected },
+                    'px-4 pb-2 text-xs font-medium outline-none sm:text-sm'
                   )
                 }
                 defaultChecked={index === 1}
@@ -84,7 +80,7 @@ const Explore: NextPage = () => {
         </Tab.Group>
       </GridItemEight>
       <GridItemFour>
-        {currentProfile ? <RecommendedProfiles /> : null}
+        {currentProfile ? <WhoToFollow /> : null}
         <Footer />
       </GridItemFour>
     </GridLayout>

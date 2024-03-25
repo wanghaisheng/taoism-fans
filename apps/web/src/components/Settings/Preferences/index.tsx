@@ -4,11 +4,16 @@ import MetaTags from '@components/Common/MetaTags';
 import NotLoggedIn from '@components/Shared/NotLoggedIn';
 import { APP_NAME } from '@hey/data/constants';
 import { PAGEVIEW } from '@hey/data/tracking';
-import { Card, GridItemEight, GridItemFour, GridLayout } from '@hey/ui';
-import isFeatureEnabled from '@lib/isFeatureEnabled';
+import {
+  Card,
+  CardHeader,
+  GridItemEight,
+  GridItemFour,
+  GridLayout
+} from '@hey/ui';
 import { Leafwatch } from '@lib/leafwatch';
-import useProfileStore from 'src/store/persisted/useProfileStore';
-import { useEffectOnce } from 'usehooks-ts';
+import { useEffect } from 'react';
+import { useProfileStore } from 'src/store/persisted/useProfileStore';
 
 import SettingsSidebar from '../Sidebar';
 import HighSignalNotificationFilter from './HighSignalNotificationFilter';
@@ -16,11 +21,11 @@ import IsPride from './IsPride';
 import PushNotifications from './PushNotifications';
 
 const PreferencesSettings: NextPage = () => {
-  const currentProfile = useProfileStore((state) => state.currentProfile);
+  const { currentProfile } = useProfileStore();
 
-  useEffectOnce(() => {
+  useEffect(() => {
     Leafwatch.track(PAGEVIEW, { page: 'settings', subpage: 'preferences' });
-  });
+  }, []);
 
   if (!currentProfile) {
     return <NotLoggedIn />;
@@ -33,18 +38,15 @@ const PreferencesSettings: NextPage = () => {
         <SettingsSidebar />
       </GridItemFour>
       <GridItemEight>
-        <Card className="p-5">
-          <div className="space-y-3">
-            <div className="text-lg font-bold">Your Preferences</div>
-            <p>
-              Update your preferences to control how you can change your
-              experience on {APP_NAME}.
-            </p>
-          </div>
-          <div className="divider my-5" />
-          <div className="space-y-6">
+        <Card>
+          <CardHeader
+            body={`Update your preferences to control how you can change your
+            experience on ${APP_NAME}.`}
+            title="Your Preferences"
+          />
+          <div className="m-5 space-y-6">
             <HighSignalNotificationFilter />
-            {isFeatureEnabled('push-notifications') && <PushNotifications />}
+            <PushNotifications />
             <IsPride />
           </div>
         </Card>

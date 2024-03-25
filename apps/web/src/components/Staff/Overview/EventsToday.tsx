@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 
-import { BRAND_COLOR } from '@hey/data/constants';
 import formatDate from '@hey/lib/datetime/formatDate';
+import { CardHeader } from '@hey/ui';
 import {
   CategoryScale,
   Chart as ChartJS,
@@ -13,7 +13,9 @@ import {
   Title,
   Tooltip
 } from 'chart.js';
+import { useTheme } from 'next-themes';
 import { Line } from 'react-chartjs-2';
+import colors from 'tailwindcss/colors';
 
 import type { StatsType } from './LeafwatchStats';
 
@@ -33,39 +35,42 @@ interface EventsTodayProps {
 }
 
 const EventsToday: FC<EventsTodayProps> = ({ eventsToday }) => {
+  const { resolvedTheme } = useTheme();
+
   return (
-    <div>
-      <div>
-        <div className="divider" />
-        <div className="p-5 text-lg font-bold">Events Today</div>
-        <div className="divider" />
-        <div className="p-5">
-          <Line
-            data={{
-              datasets: [
-                {
-                  backgroundColor: '#fff0f2',
-                  borderColor: BRAND_COLOR,
-                  data: eventsToday.map((event) => event.count),
-                  fill: true,
-                  label: 'Events'
-                }
-              ],
-              labels: eventsToday.map((event) =>
-                formatDate(event.timestamp, 'hh:mm')
-              )
-            }}
-            options={{
-              plugins: {
-                legend: { display: false },
-                title: { display: false }
-              },
-              responsive: true
-            }}
-          />
-        </div>
+    <>
+      <div className="divider" />
+      <CardHeader title="Events Today" />
+      <div className="m-5">
+        <Line
+          data={{
+            datasets: [
+              {
+                backgroundColor:
+                  resolvedTheme === 'dark'
+                    ? colors['zinc']['900']
+                    : colors['zinc']['200'],
+                borderColor:
+                  resolvedTheme === 'dark' ? colors['white'] : colors['black'],
+                data: eventsToday.map((event) => event.count),
+                fill: true,
+                label: 'Events'
+              }
+            ],
+            labels: eventsToday.map((event) =>
+              formatDate(event.timestamp, 'hh:mm')
+            )
+          }}
+          options={{
+            plugins: {
+              legend: { display: false },
+              title: { display: false }
+            },
+            responsive: true
+          }}
+        />
       </div>
-    </div>
+    </>
   );
 };
 

@@ -1,10 +1,10 @@
 import type { Handler } from 'express';
 
 import logger from '@hey/lib/logger';
-import catchedError from '@utils/catchedError';
-import { SWR_CACHE_AGE_1_MIN_30_DAYS } from '@utils/constants';
-import { noBody } from '@utils/responses';
 import { XMLBuilder } from 'fast-xml-parser';
+import catchedError from 'src/lib/catchedError';
+import { CACHE_AGE_INDEFINITE } from 'src/lib/constants';
+import { noBody } from 'src/lib/responses';
 
 export const config = {
   api: { responseLimit: '8mb' }
@@ -60,7 +60,7 @@ export const get: Handler = async (req, res) => {
     return res
       .status(200)
       .setHeader('Content-Type', 'text/xml')
-      .setHeader('Cache-Control', SWR_CACHE_AGE_1_MIN_30_DAYS)
+      .setHeader('Cache-Control', CACHE_AGE_INDEFINITE)
       .send(xml);
   } catch (error) {
     return catchedError(res, error);

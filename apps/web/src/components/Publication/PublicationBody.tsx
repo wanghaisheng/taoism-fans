@@ -18,18 +18,20 @@ import { memo } from 'react';
 import { isIOS, isMobile } from 'react-device-detect';
 
 import EncryptedPublication from './EncryptedPublication';
-import Nft from './HeyOpenActions/Nft';
 import Metadata from './Metadata';
 import NotSupportedPublication from './NotSupportedPublication';
+import OpenActionOnBody from './OpenAction/OnBody';
 import Poll from './Poll';
 
 interface PublicationBodyProps {
+  contentClassName?: string;
   publication: AnyPublication;
   quoted?: boolean;
   showMore?: boolean;
 }
 
 const PublicationBody: FC<PublicationBodyProps> = ({
+  contentClassName = '',
   publication,
   quoted = false,
   showMore = false
@@ -64,8 +66,6 @@ const PublicationBody: FC<PublicationBodyProps> = ({
     return <NotSupportedPublication type={metadata.__typename} />;
   }
 
-  // Show NFT if it's there
-  const showNft = metadata.__typename === 'MintMetadataV3';
   // Show live if it's there
   const showLive = metadata.__typename === 'LiveStreamMetadataV3';
   // Show attachments if it's there
@@ -77,19 +77,15 @@ const PublicationBody: FC<PublicationBodyProps> = ({
   const showSharingLink = metadata.__typename === 'LinkMetadataV3';
   // Show oembed if no NFT, no attachments, no quoted publication
   const showOembed =
-    !showSharingLink &&
-    hasURLs &&
-    !showNft &&
-    !showLive &&
-    !showAttachments &&
-    !quoted;
+    !showSharingLink && hasURLs && !showLive && !showAttachments && !quoted;
 
   return (
     <div className="break-words">
       <Markup
         className={cn(
           { 'line-clamp-5': canShowMore },
-          'markup linkify text-md break-words'
+          'markup linkify text-md break-words',
+          contentClassName
         )}
         mentions={targetPublication.profilesMentioned}
       >
@@ -101,15 +97,14 @@ const PublicationBody: FC<PublicationBodyProps> = ({
           <Link href={`/posts/${id}`}>Show more</Link>
         </div>
       ) : null}
+      {/* Open Action */}
+      <OpenActionOnBody publication={targetPublication} />
       {/* Attachments and Quotes */}
       {showAttachments ? (
         <Attachments asset={filteredAsset} attachments={filteredAttachments} />
       ) : null}
       {/* Poll */}
       {showPoll ? <Poll id={pollId} /> : null}
-      {showNft ? (
-        <Nft mintLink={metadata.mintLink} publicationId={publication.id} />
-      ) : null}
       {showLive ? (
         <div className="mt-3">
           <Video src={metadata.liveURL || metadata.playbackURL} />

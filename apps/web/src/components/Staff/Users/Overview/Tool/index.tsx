@@ -1,6 +1,7 @@
 import type { Profile } from '@hey/lens';
 import type { FC } from 'react';
 
+import P2PRecommendation from '@components/Shared/Profile/P2PRecommendation';
 import UserProfile from '@components/Shared/UserProfile';
 import {
   BanknotesIcon,
@@ -34,9 +35,10 @@ interface ProfileStaffToolProps {
 const ProfileStaffTool: FC<ProfileStaffToolProps> = ({ profile }) => {
   const getHaveUsedHey = async () => {
     try {
-      const response = await axios.get(`${HEY_API_URL}/stats/haveUsedHey`, {
-        params: { id: profile.id }
-      });
+      const response = await axios.get(
+        `${HEY_API_URL}/internal/leafwatch/profile/haveUsedHey`,
+        { params: { id: profile.id } }
+      );
 
       return response.data.haveUsedHey;
     } catch {
@@ -57,6 +59,8 @@ const ProfileStaffTool: FC<ProfileStaffToolProps> = ({ profile }) => {
   return (
     <div>
       <UserProfile
+        hideFollowButton
+        hideUnfollowButton
         isBig
         linkToProfile
         profile={profile}
@@ -140,10 +144,12 @@ const ProfileStaffTool: FC<ProfileStaffToolProps> = ({ profile }) => {
             </Link>
           </MetaDetails>
         ) : null}
+        <div className="pt-2">
+          <P2PRecommendation profile={profile} />
+        </div>
       </div>
       <div className="divider my-5 border-dashed border-yellow-600" />
       <OnchainIdentities onchainIdentity={profile.onchainIdentity} />
-      <div className="divider my-5 border-dashed border-yellow-600" />
       {IS_MAINNET ? (
         <>
           <LeafwatchDetails profileId={profile.id} />
@@ -151,18 +157,21 @@ const ProfileStaffTool: FC<ProfileStaffToolProps> = ({ profile }) => {
           <Rank
             address={profile.ownedBy.address}
             handle={profile.handle?.localName}
+            lensClassifierScore={profile.stats.lensClassifierScore || 0}
             profileId={profile.id}
           />
           <div className="divider my-5 border-dashed border-yellow-600" />
         </>
       ) : null}
       {preferences ? (
-        <FeatureFlags
-          features={preferences.features || []}
-          profileId={profile.id}
-        />
+        <>
+          <FeatureFlags
+            features={preferences.features || []}
+            profileId={profile.id}
+          />
+          <div className="divider my-5 border-dashed border-yellow-600" />
+        </>
       ) : null}
-      <div className="divider my-5 border-dashed border-yellow-600" />
       <ManagedProfiles address={profile.ownedBy.address} />
     </div>
   );

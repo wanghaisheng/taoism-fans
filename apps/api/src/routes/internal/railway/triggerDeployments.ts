@@ -2,9 +2,9 @@ import type { Handler } from 'express';
 
 import { Errors } from '@hey/data/errors';
 import logger from '@hey/lib/logger';
-import catchedError from '@utils/catchedError';
-import { invalidBody, noBody } from '@utils/responses';
 import axios from 'axios';
+import catchedError from 'src/lib/catchedError';
+import { invalidBody, noBody } from 'src/lib/responses';
 import { object, string } from 'zod';
 
 type ExtensionRequest = {
@@ -17,7 +17,7 @@ const validationSchema = object({
   serviceId: string()
 });
 
-export const post: Handler = async (req, res) => {
+export const post: Handler = (req, res) => {
   const { body } = req;
 
   if (!body) {

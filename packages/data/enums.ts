@@ -13,7 +13,8 @@ export enum HomeFeedType {
 }
 export enum ModFeedType {
   LATEST = 'LATEST',
-  REPORTS = 'REPORTS'
+  PROFILES = 'PROFILES',
+  SEARCH = 'SEARCH'
 }
 
 export const AlgorithmProvider = {
@@ -22,5 +23,6 @@ export const AlgorithmProvider = {
 };
 
 export enum OpenAction {
+  Swap = 'Swap',
   Tip = 'Tip'
 }

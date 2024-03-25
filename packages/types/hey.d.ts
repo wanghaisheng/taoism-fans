@@ -4,26 +4,8 @@ import type {
   RecipientDataInput
 } from '@hey/lens';
 
-export type Group = {
-  avatar: string;
-  createdAt: Date;
-  description: string;
-  discord: null | string;
-  featured: boolean;
-  id: string;
-  instagram: null | string;
-  lens: null | string;
-  name: string;
-  slug: string;
-  tags: string[];
-  x: null | string;
-};
-
 export type StaffPick = {
-  createdAt: Date;
-  id: string;
-  score: number;
-  type: 'GROUP' | 'PROFILE';
+  profileId: string;
 };
 
 export type Feature = {
@@ -31,8 +13,7 @@ export type Feature = {
   enabled: boolean;
   id: string;
   key: string;
-  priority: number;
-  type: 'FEATURE' | 'KILL_SWITCH' | 'MODE' | 'PERMISSION';
+  type: 'FEATURE' | 'MODE' | 'PERMISSION';
 };
 
 export type AllowedToken = {
@@ -87,5 +68,8 @@ export type Preferences = {
   hasDismissedOrMintedMembershipNft: boolean;
   highSignalNotificationFilter: boolean;
   isPride: boolean;
-  isPro: boolean;
+};
+
+export type ProfileFlags = {
+  isSuspended: boolean;
 };

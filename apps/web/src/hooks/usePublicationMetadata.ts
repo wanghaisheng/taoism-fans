@@ -1,11 +1,8 @@
 import { APP_NAME } from '@hey/data/constants';
-import getURLs from '@hey/lib/getURLs';
-import getNft from '@hey/lib/nft/getNft';
 import {
   audio,
   image,
   liveStream,
-  mint,
   textOnly,
   video
 } from '@lens-protocol/metadata';
@@ -23,25 +20,11 @@ interface UsePublicationMetadataProps {
 }
 
 const usePublicationMetadata = () => {
-  const videoDurationInSeconds = usePublicationVideoStore(
-    (state) => state.videoDurationInSeconds
-  );
-  const videoThumbnail = usePublicationVideoStore(
-    (state) => state.videoThumbnail
-  );
-  const audioPublication = usePublicationAudioStore(
-    (state) => state.audioPublication
-  );
-  const license = usePublicationLicenseStore((state) => state.license);
-  const attachments = usePublicationAttachmentStore(
-    (state) => state.attachments
-  );
-  const liveVideoConfig = usePublicationLiveStore(
-    (state) => state.liveVideoConfig
-  );
-  const showLiveVideoEditor = usePublicationLiveStore(
-    (state) => state.showLiveVideoEditor
-  );
+  const { videoDurationInSeconds, videoThumbnail } = usePublicationVideoStore();
+  const { audioPublication } = usePublicationAudioStore();
+  const { license } = usePublicationLicenseStore();
+  const { attachments } = usePublicationAttachmentStore((state) => state);
+  const { liveVideoConfig, showLiveVideoEditor } = usePublicationLiveStore();
 
   const attachmentsHasAudio = attachments[0]?.type === 'Audio';
   const attachmentsHasVideo = attachments[0]?.type === 'Video';
@@ -54,13 +37,10 @@ const usePublicationMetadata = () => {
 
   const getMetadata = useCallback(
     ({ baseMetadata }: UsePublicationMetadataProps) => {
-      const urls = getURLs(baseMetadata.content);
-
       const hasAttachments = attachments.length;
       const isImage = attachments[0]?.type === 'Image';
       const isAudio = attachments[0]?.type === 'Audio';
       const isVideo = attachments[0]?.type === 'Video';
-      const isMint = Boolean(getNft(urls)?.mintLink);
       const isLiveStream = Boolean(showLiveVideoEditor && liveVideoConfig.id);
 
       const localBaseMetadata = {
@@ -76,13 +56,6 @@ const usePublicationMetadata = () => {
       }));
 
       switch (true) {
-        case isMint:
-          return mint({
-            ...baseMetadata,
-            ...localBaseMetadata,
-            ...(hasAttachments && { attachments: attachmentsToBeUploaded }),
-            mintLink: getNft(urls)?.mintLink
-          });
         case isLiveStream:
           return liveStream({
             ...baseMetadata,
@@ -102,6 +75,7 @@ const usePublicationMetadata = () => {
             ...localBaseMetadata,
             attachments: attachmentsToBeUploaded,
             image: {
+              ...(license && { license }),
               item: attachments[0]?.uri,
               type: attachments[0]?.mimeType
             }

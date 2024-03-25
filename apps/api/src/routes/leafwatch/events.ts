@@ -2,11 +2,11 @@ import type { Handler } from 'express';
 
 import { ALL_EVENTS } from '@hey/data/tracking';
 import logger from '@hey/lib/logger';
-import catchedError from '@utils/catchedError';
-import createClickhouseClient from '@utils/createClickhouseClient';
-import checkEventExistence from '@utils/leafwatch/checkEventExistence';
-import { invalidBody, noBody } from '@utils/responses';
 import requestIp from 'request-ip';
+import catchedError from 'src/lib/catchedError';
+import createClickhouseClient from 'src/lib/createClickhouseClient';
+import checkEventExistence from 'src/lib/leafwatch/checkEventExistence';
+import { invalidBody, noBody } from 'src/lib/responses';
 import UAParser from 'ua-parser-js';
 import urlcat from 'urlcat';
 import { any, object, string } from 'zod';
@@ -94,6 +94,7 @@ export const post: Handler = async (req, res) => {
           browser_version: ua.browser.version || null,
           city: ipData?.city || null,
           country: ipData?.country || null,
+          ip: ip || null,
           name,
           os: ua.os.name || null,
           platform: platform || null,
@@ -109,6 +110,7 @@ export const post: Handler = async (req, res) => {
         }
       ]
     });
+
     logger.info('Ingested event to Leafwatch');
 
     return res.status(200).json({ id: result.query_id, success: true });

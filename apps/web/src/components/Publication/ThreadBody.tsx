@@ -2,8 +2,7 @@ import type { AnyPublication } from '@hey/lens';
 import type { FC } from 'react';
 
 import PublicationWrapper from '@components/Shared/PublicationWrapper';
-import pushToImpressions from '@lib/pushToImpressions';
-import { useInView } from 'react-cool-inview';
+import usePushToImpressions from 'src/hooks/usePushToImpressions';
 
 import PublicationActions from './Actions';
 import HiddenPublication from './HiddenPublication';
@@ -16,23 +15,14 @@ interface ThreadBodyProps {
 }
 
 const ThreadBody: FC<ThreadBodyProps> = ({ publication }) => {
-  const { observe } = useInView({
-    onChange: ({ inView }) => {
-      if (!inView) {
-        return;
-      }
-
-      pushToImpressions(publication.id);
-    }
-  });
+  usePushToImpressions(publication.id);
 
   return (
     <PublicationWrapper publication={publication}>
-      <span ref={observe} />
-      <div className="relative flex items-start space-x-3 pb-5">
+      <div className="relative flex items-start space-x-3 pb-3">
         <PublicationAvatar publication={publication} />
-        <div className="absolute bottom-0 left-[11.1px] h-full border-[0.9px] border-solid border-gray-300 dark:border-gray-700" />
-        <div className="w-full">
+        <div className="absolute bottom-0 left-[9.1px] h-full border-[0.9px] border-solid border-gray-300 dark:border-gray-700" />
+        <div className="w-[calc(100%-55px)]">
           <PublicationHeader publication={publication} />
           {publication.isHidden ? (
             <HiddenPublication type={publication.__typename} />

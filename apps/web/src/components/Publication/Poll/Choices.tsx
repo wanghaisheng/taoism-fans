@@ -21,7 +21,7 @@ import plur from 'plur';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useProfileRestriction } from 'src/store/non-persisted/useProfileRestriction';
-import useProfileStore from 'src/store/persisted/useProfileStore';
+import { useProfileStore } from 'src/store/persisted/useProfileStore';
 
 interface ChoicesProps {
   poll: Poll;
@@ -29,7 +29,7 @@ interface ChoicesProps {
 }
 
 const Choices: FC<ChoicesProps> = ({ poll, refetch }) => {
-  const currentProfile = useProfileStore((state) => state.currentProfile);
+  const { currentProfile } = useProfileStore();
   const { isSuspended } = useProfileRestriction();
   const [pollSubmitting, setPollSubmitting] = useState(false);
   const [selectedOption, setSelectedOption] = useState<null | string>(null);
@@ -68,13 +68,15 @@ const Choices: FC<ChoicesProps> = ({ poll, refetch }) => {
     }
   };
 
+  const isPollLive = new Date(endsAt) > new Date();
+
   return (
     <Card className="mt-3" onClick={stopEventPropagation}>
       <div className="space-y-1 p-3">
         {options.map(({ id, option, percentage, voted }) => (
           <button
-            className="flex w-full items-center space-x-2.5 rounded-xl p-2 text-xs hover:bg-gray-100 sm:text-sm dark:hover:bg-gray-900"
-            disabled={pollSubmitting}
+            className="flex w-full items-center space-x-2.5 rounded-xl p-2 text-left text-xs hover:bg-gray-100 sm:text-sm dark:hover:bg-gray-900"
+            disabled={!isPollLive || pollSubmitting}
             key={id}
             onClick={() => votePoll(id)}
             type="button"
@@ -100,7 +102,7 @@ const Choices: FC<ChoicesProps> = ({ poll, refetch }) => {
               </div>
               <div className="flex h-2.5 overflow-hidden rounded-full bg-gray-300 dark:bg-gray-800">
                 <div
-                  className={cn(voted ? 'bg-green-500' : 'bg-brand-500')}
+                  className="bg-green-500"
                   style={{ width: `${percentage}%` }}
                 />
               </div>
@@ -115,7 +117,7 @@ const Choices: FC<ChoicesProps> = ({ poll, refetch }) => {
             {humanize(totalResponses || 0)} {plur('vote', totalResponses || 0)}
           </span>
           <span>·</span>
-          {new Date(endsAt) > new Date() ? (
+          {isPollLive ? (
             <span>{getTimetoNow(new Date(endsAt))} left</span>
           ) : (
             <span>Poll ended</span>

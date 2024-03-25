@@ -23,10 +23,9 @@ const getPreferences = async (
   } catch {
     return {
       features: [],
-      hasDismissedOrMintedMembershipNft: false,
+      hasDismissedOrMintedMembershipNft: true,
       highSignalNotificationFilter: false,
-      isPride: false,
-      isPro: false
+      isPride: false
     };
   }
 };

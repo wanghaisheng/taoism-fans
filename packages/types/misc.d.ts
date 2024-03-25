@@ -1,4 +1,5 @@
-import type { Maybe, PublicationMetadataLicenseType } from '@hey/lens';
+import type { Maybe } from '@hey/lens';
+import type { MetadataLicenseType } from '@lens-protocol/metadata';
 
 import type { OptmisticPublicationType } from './enums';
 
@@ -13,7 +14,7 @@ export interface NewAttachment {
   mimeType: string;
   previewUri: string;
   type: 'Audio' | 'Image' | 'Video';
-  uri: string;
+  uri?: string;
 }
 
 export interface UserSuggestion {
@@ -24,6 +25,14 @@ export interface UserSuggestion {
   uid: string;
 }
 
+export interface Nft {
+  chain: null | string;
+  collectionName: string;
+  creatorAddress: `0x${string}` | null;
+  mediaUrl: string;
+  sourceUrl: string;
+}
+
 export interface OG {
   description: null | string;
   favicon: null | string;
@@ -31,6 +40,7 @@ export interface OG {
   image: null | string;
   isLarge: boolean | null;
   lastIndexedAt?: string;
+  nft: Nft | null;
   site: null | string;
   title: null | string;
   url: string;
@@ -58,8 +68,10 @@ export interface MessageDescriptor {
 }
 
 export interface OptimisticTransaction {
+  collectOn?: string;
   commentOn?: string;
-  content: string;
+  content?: string;
+  mirrorOn?: string;
   txHash?: string;
   txId?: string;
   type: OptmisticPublicationType;
@@ -73,7 +85,7 @@ export interface MarkupLinkProps {
 export interface MetadataAsset {
   artist?: string;
   cover?: string;
-  license?: Maybe<PublicationMetadataLicenseType>;
+  license?: Maybe<MetadataLicenseType>;
   title?: string;
   type: 'Audio' | 'Image' | 'Video';
   uri: string;

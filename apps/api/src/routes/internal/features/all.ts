@@ -1,11 +1,10 @@
 import type { Handler } from 'express';
 
 import logger from '@hey/lib/logger';
-import catchedError from '@utils/catchedError';
-import { SWR_CACHE_AGE_1_MIN_30_DAYS } from '@utils/constants';
-import validateIsStaff from '@utils/middlewares/validateIsStaff';
-import prisma from '@utils/prisma';
-import { notAllowed } from '@utils/responses';
+import catchedError from 'src/lib/catchedError';
+import validateIsStaff from 'src/lib/middlewares/validateIsStaff';
+import prisma from 'src/lib/prisma';
+import { notAllowed } from 'src/lib/responses';
 
 export const get: Handler = async (req, res) => {
   if (!(await validateIsStaff(req))) {
@@ -18,10 +17,7 @@ export const get: Handler = async (req, res) => {
     });
     logger.info('All features fetched');
 
-    return res
-      .status(200)
-      .setHeader('Cache-Control', SWR_CACHE_AGE_1_MIN_30_DAYS)
-      .json({ features: data, success: true });
+    return res.status(200).json({ features: data, success: true });
   } catch (error) {
     return catchedError(res, error);
   }

@@ -30,19 +30,14 @@ import toast from 'react-hot-toast';
 import useHandleWrongNetwork from 'src/hooks/useHandleWrongNetwork';
 import { useNonceStore } from 'src/store/non-persisted/useNonceStore';
 import { useProfileRestriction } from 'src/store/non-persisted/useProfileRestriction';
-import useProfileStore from 'src/store/persisted/useProfileStore';
+import { useProfileStore } from 'src/store/persisted/useProfileStore';
 import { useSignTypedData, useWriteContract } from 'wagmi';
 
 const LinkHandle: FC = () => {
-  const currentProfile = useProfileStore((state) => state.currentProfile);
+  const { currentProfile } = useProfileStore();
   const { isSuspended } = useProfileRestriction();
-  const lensHubOnchainSigNonce = useNonceStore(
-    (state) => state.lensHubOnchainSigNonce
-  );
-  const setLensHubOnchainSigNonce = useNonceStore(
-    (state) => state.setLensHubOnchainSigNonce
-  );
-
+  const { incrementLensHubOnchainSigNonce, lensHubOnchainSigNonce } =
+    useNonceStore();
   const [linkingHandle, setLinkingHandle] = useState<null | string>(null);
 
   const handleWrongNetwork = useHandleWrongNetwork();
@@ -74,12 +69,12 @@ const LinkHandle: FC = () => {
   });
 
   const { signTypedDataAsync } = useSignTypedData({ mutation: { onError } });
-  const { data: writeHash, writeContract } = useWriteContract({
+  const { data: writeHash, writeContractAsync } = useWriteContract({
     mutation: { onError, onSuccess: () => onCompleted() }
   });
 
-  const write = ({ args }: { args: any[] }) => {
-    return writeContract({
+  const write = async ({ args }: { args: any[] }) => {
+    return await writeContractAsync({
       abi: TokenHandleRegistry,
       address: TOKEN_HANDLE_REGISTRY,
       args,
@@ -98,19 +93,21 @@ const LinkHandle: FC = () => {
       onCompleted: async ({ createLinkHandleToProfileTypedData }) => {
         const { id, typedData } = createLinkHandleToProfileTypedData;
         const signature = await signTypedDataAsync(getSignature(typedData));
-        setLensHubOnchainSigNonce(lensHubOnchainSigNonce + 1);
+        await handleWrongNetwork();
+        incrementLensHubOnchainSigNonce();
 
         if (canBroadcast) {
           const { data } = await broadcastOnchain({
             variables: { request: { id, signature } }
           });
           if (data?.broadcastOnchain.__typename === 'RelayError') {
-            return write({ args: [typedData.value] });
+            return await write({ args: [typedData.value] });
           }
+
           return;
         }
 
-        return write({ args: [typedData.value] });
+        return await write({ args: [typedData.value] });
       },
       onError
     });
@@ -145,10 +142,6 @@ const LinkHandle: FC = () => {
       return toast.error(Errors.Suspended);
     }
 
-    if (handleWrongNetwork()) {
-      return;
-    }
-
     const confirmation = confirm('Are you sure you want to link this handle?');
 
     if (!confirmation) {
@@ -175,7 +168,7 @@ const LinkHandle: FC = () => {
   };
 
   if (loading) {
-    return <Loader />;
+    return <Loader className="py-10" />;
   }
 
   const ownedHandles = data?.ownedHandles.items.filter(
@@ -186,7 +179,7 @@ const LinkHandle: FC = () => {
     return (
       <EmptyState
         hideCard
-        icon={<AtSymbolIcon className="text-brand-500 size-8" />}
+        icon={<AtSymbolIcon className="size-8" />}
         message="No handles found to link!"
       />
     );
@@ -200,7 +193,7 @@ const LinkHandle: FC = () => {
     broadcastData.broadcastOnchain.txId;
 
   return (
-    <div className="space-y-6">
+    <div className="m-5 space-y-6">
       {ownedHandles?.map((handle) => (
         <div
           className="flex flex-wrap items-center justify-between gap-3"

@@ -9,8 +9,7 @@ import { ErrorMessage, Input } from '@hey/ui';
 import cn from '@hey/ui/cn';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { useRef, useState } from 'react';
-import { useEffectOnce } from 'usehooks-ts';
+import { useEffect, useRef, useState } from 'react';
 
 import Loader from '../Loader';
 
@@ -40,9 +39,9 @@ const List: FC<ListProps> = ({ setEmoji }) => {
     });
   }
 
-  useEffectOnce(() => {
+  useEffect(() => {
     inputRef.current?.focus();
-  });
+  }, []);
 
   if (error) {
     return (
@@ -58,7 +57,7 @@ const List: FC<ListProps> = ({ setEmoji }) => {
   }
 
   if (isLoading) {
-    return <Loader message="Loading emojis" />;
+    return <Loader className="my-5" message="Loading emojis" />;
   }
 
   return (

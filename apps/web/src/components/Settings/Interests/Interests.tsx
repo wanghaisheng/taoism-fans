@@ -17,14 +17,14 @@ import { Leafwatch } from '@lib/leafwatch';
 import sanitizeProfileInterests from '@lib/sanitizeProfileInterests';
 import toast from 'react-hot-toast';
 import { useProfileRestriction } from 'src/store/non-persisted/useProfileRestriction';
-import useProfileStore from 'src/store/persisted/useProfileStore';
+import { useProfileStore } from 'src/store/persisted/useProfileStore';
 
 import Loader from '../../Shared/Loader';
 
 const MAX_TOPICS_ALLOWED = 12;
 
 const Interests: FC = () => {
-  const currentProfile = useProfileStore((state) => state.currentProfile);
+  const { currentProfile } = useProfileStore();
   const { isSuspended } = useProfileRestriction();
   const { cache } = useApolloClient();
 
@@ -79,11 +79,11 @@ const Interests: FC = () => {
   };
 
   if (loading) {
-    return <Loader />;
+    return <Loader className="py-10" />;
   }
 
   return (
-    <div className="space-y-4">
+    <div className="m-5 space-y-4">
       {sanitizeProfileInterests(interestsData)?.map(
         ({ category, subCategories }) => (
           <div className="space-y-2" key={category.id}>
@@ -98,7 +98,7 @@ const Interests: FC = () => {
                   }
                   icon={
                     selectedTopics.includes(subCategory.id) ? (
-                      <CheckCircleIcon className="text-brand-500 size-4" />
+                      <CheckCircleIcon className="size-4" />
                     ) : (
                       <PlusCircleIcon className="size-4" />
                     )
@@ -127,7 +127,7 @@ const Interests: FC = () => {
                   }
                   icon={
                     selectedTopics.includes(category.id) ? (
-                      <CheckCircleIcon className="text-brand-500 size-4" />
+                      <CheckCircleIcon className="size-4" />
                     ) : (
                       <PlusCircleIcon className="size-4" />
                     )

@@ -9,21 +9,13 @@ import { usePublicationVideoStore } from 'src/store/non-persisted/publication/us
 import { v4 as uuid } from 'uuid';
 
 const useUploadAttachments = () => {
-  const setUploadedPercentage = usePublicationVideoStore(
-    (state) => state.setUploadedPercentage
-  );
-  const addAttachments = usePublicationAttachmentStore(
-    (state) => state.addAttachments
-  );
-  const removeAttachments = usePublicationAttachmentStore(
-    (state) => state.removeAttachments
-  );
-  const updateAttachments = usePublicationAttachmentStore(
-    (state) => state.updateAttachments
-  );
-  const { setIsUploading } = usePublicationAttachmentStore((state) => ({
-    setIsUploading: state.setIsUploading
-  }));
+  const { setUploadedPercentage } = usePublicationVideoStore();
+  const {
+    addAttachments,
+    removeAttachments,
+    setIsUploading,
+    updateAttachments
+  } = usePublicationAttachmentStore((state) => state);
 
   const validateFileSize = (file: any) => {
     const isImage = file.type.includes('image');
@@ -84,8 +76,7 @@ const useUploadAttachments = () => {
               ? 'Image'
               : file.type.includes('video')
                 ? 'Video'
-                : 'Audio',
-            uri: URL.createObjectURL(file)
+                : 'Audio'
           };
         }
       );

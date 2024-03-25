@@ -8,10 +8,10 @@ import {
 } from '@hey/lens';
 import allowedOpenActionModules from '@hey/lib/allowedOpenActionModules';
 import getAllTokens from '@hey/lib/api/getAllTokens';
-import { ErrorMessage, Select } from '@hey/ui';
+import { CardHeader, ErrorMessage, Select } from '@hey/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import useProfileStore from 'src/store/persisted/useProfileStore';
+import { useProfileStore } from 'src/store/persisted/useProfileStore';
 
 import Allowance from './Allowance';
 
@@ -24,7 +24,10 @@ const getAllowancePayload = (currency: string) => {
 };
 
 const CollectModules: FC = () => {
-  const currentProfile = useProfileStore((state) => state.currentProfile);
+  const { currentProfile } = useProfileStore();
+  const [selectedCurrency, setSelectedCurrency] = useState(
+    DEFAULT_COLLECT_TOKEN
+  );
   const [currencyLoading, setCurrencyLoading] = useState(false);
 
   const {
@@ -54,41 +57,36 @@ const CollectModules: FC = () => {
   }
 
   return (
-    <div className="mt-5">
-      <div>
-        <div className="space-y-3">
-          <div className="text-lg font-bold">
-            Allow / revoke follow or collect modules
-          </div>
-          <p>
-            In order to use collect feature you need to allow the module you
-            use, you can allow and revoke the module anytime.
-          </p>
-        </div>
-        <div className="divider my-5" />
-        <div className="label mt-6">Select currency</div>
+    <div>
+      <CardHeader
+        body="In order to use collect feature you need to allow the module you
+            use, you can allow and revoke the module anytime."
+        title="Allow / revoke follow or collect modules"
+      />
+      <div className="m-5">
+        <div className="label">Select currency</div>
         <Select
-          onChange={(e) => {
+          onChange={(value) => {
             setCurrencyLoading(true);
+            setSelectedCurrency(value);
             refetch({
-              request: getAllowancePayload(e.target.value)
+              request: getAllowancePayload(value)
             }).finally(() => setCurrencyLoading(false));
           }}
           options={
             allowedTokens?.map((token) => ({
               label: token.name,
+              selected: token.contractAddress === selectedCurrency,
               value: token.contractAddress
             })) || [{ label: 'Loading...', value: 'Loading...' }]
           }
         />
+        {loading || allowedTokensLoading || currencyLoading ? (
+          <Loader className="py-10" />
+        ) : (
+          <Allowance allowance={data} />
+        )}
       </div>
-      {loading || allowedTokensLoading || currencyLoading ? (
-        <div className="py-5">
-          <Loader />
-        </div>
-      ) : (
-        <Allowance allowance={data} />
-      )}
     </div>
   );
 };
